@@ -64,7 +64,7 @@ export const deletePost = async (req, res) => {
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
     console.log("error in deletePost controller:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -91,7 +91,7 @@ export const commentOntPost = async (req, res) => {
     res.status(200).json("Comment posted");
   } catch (error) {
     console.log("error in commentOnPost: ", error);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -129,7 +129,7 @@ export const likeUnlikePost = async (req, res) => {
     }
   } catch (error) {
     console.log("error in likeUnlikePost controller: ", error);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -153,7 +153,7 @@ export const getAllPosts = async (req, res) => {
     res.status(200).json(posts);
   } catch (error) {
     console.log("error in getAllPosts controller: ", error);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -179,7 +179,7 @@ export const getLikedPosts = async (req, res) => {
     res.status(200).json(likedPosts);
   } catch (error) {
     console.log("error in getLikedPosts controller: ", error);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
