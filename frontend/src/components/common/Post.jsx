@@ -12,7 +12,19 @@ import { formatPostDate } from "../../utils/date/index.js";
 
 const Post = ({ post }) => {
   const [comment, setComment] = useState("");
-  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+  const { data: authUser } = useQuery({
+    queryKey: ["authUser"],
+    queryFn: async () => {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+
+      return data;
+    },
+  });
   const queryClient = useQueryClient();
 
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
@@ -52,16 +64,23 @@ const Post = ({ post }) => {
       }
     },
     onSuccess: (updatedLikes) => {
-      // this is not the best UX, bc it will refech all posts
-      // queryClient.invalidateQueries({ queryKey: ["posts"] });
-      // instead update the catch directly for that post
       queryClient.setQueryData(["posts"], (oldData) => {
+        if (!Array.isArray(oldData)) return oldData;
+
         return oldData.map((p) => {
           if (p._id === post._id) {
-            return { ...p, likes: updatedLikes };
+            return {
+              ...p,
+              likes: updatedLikes,
+            };
           }
+
           return p;
         });
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["notifications"],
       });
     },
     onError: (error) => {
@@ -69,7 +88,7 @@ const Post = ({ post }) => {
     },
   });
 
-  const { mutate: commentPost, inPending: isCommenting } = useMutation({
+  const { mutate: commentPost, isPending: isCommenting } = useMutation({
     mutationFn: async () => {
       try {
         const res = await fetch(`/api/posts/comment/${post._id}`, {
@@ -83,6 +102,7 @@ const Post = ({ post }) => {
         if (!res.ok) {
           throw new Error(data.error || "Something went wrong");
         }
+        return data;
       } catch (error) {
         throw new Error(error.message);
       }
@@ -98,9 +118,9 @@ const Post = ({ post }) => {
   });
 
   const postOwner = post.user;
-  const isLiked = post.likes.includes(authUser._id);
+  const isLiked = post.likes.includes(authUser?._id);
 
-  const isMyPost = authUser._id === post.user._id;
+  const isMyPost = authUser?._id === post.user._id;
 
   const formattedDate = formatPostDate(post.createdAt);
 
